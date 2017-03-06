@@ -1,0 +1,33 @@
+{
+  "name": "hlss",
+  "version": "0.1.0",
+  "description": "Node.js HTTP Live Streaming Segmenter",
+  "main": "index.js",
+  "scripts": {
+    "lint": "node node_modules/eslint/bin/eslint.js .",
+    "lint-fix": "node node_modules/eslint/bin/eslint.js --fix .",
+    "test": "lab"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/streamer45/hlss.git"
+  },
+  "keywords": [
+    "hls",
+    "streaming",
+    "video"
+  ],
+  "author": "streamer45",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/streamer45/hlss/issues"
+  },
+  "homepage": "https://github.com/streamer45/hlss#readme",
+  "devDependencies": {
+    "code": "4.0.0",
+    "eslint": "3.17.0",
+    "eslint-config-hapi": "10.0.0",
+    "eslint-plugin-hapi": "4.0.0",
+    "lab": "12.1.0"
+  }
+}
