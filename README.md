@@ -6,9 +6,7 @@ See files in the [examples](https://github.com/streamer45/hlss/tree/master/examp
 
 ## Acknowledgements
 
-This library heavily uses code from:
-
-[mux.js](https://github.com/videojs/mux.js)
+This library heavily uses code from [mux.js](https://github.com/videojs/mux.js)
 
 ## License
 
