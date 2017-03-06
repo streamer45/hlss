@@ -14,6 +14,7 @@ class Segmenter extends EventEmitter {
     this.streamName = setup.streamName || 'stream';
     this.segDuration = setup.segDuration || 4;
     this.segNumber = setup.segNumber || 6;
+    this.deleteFiles = setup.deleteFiles || true;
     this._init();
   }
 
@@ -66,9 +67,8 @@ class Segmenter extends EventEmitter {
       }
       if (result.keyframe &&
          (this._lastPTS - this._lastSegPTS) >= this.segDuration) {
-        //console.log('need to split!', this._lastPTS - this._lastSegPTS);
         this._segments.push((this._lastPTS - this._lastSegPTS).toFixed(6));
-        if (this._segments.length === this.segNumber) {
+        if (this._segments.length > this.segNumber) {
           this._segments.shift();
           ++this._segCounter;
         }
@@ -82,6 +82,16 @@ class Segmenter extends EventEmitter {
           this._outStream.write(this._pat);
           this._outStream.write(this._pmt);
         }
+        if (this.deleteFiles === true) {
+          const delNo = this._segCounter - (this.segNumber * 3);
+          if (delNo >= 0) {
+            const delName = this.outPath + '/' +
+             this.streamName + delNo + '.ts';
+            fs.unlink(delName, (err) => {
+              if (err) this.emit('error', err);
+            });
+          }
+        }
       }
     }
     this._outStream.write(Buffer.from(packet));
@@ -93,8 +103,16 @@ class Segmenter extends EventEmitter {
     const outName = this.outPath + '/' + this.streamName +
     (this._segCounter + this._segments.length) + '.ts';
     this._outStream = fs.createWriteStream(outName);
-    //this._packetStream.pipe(this._parseStream);
     this._inStream.on('data', this._pipe.bind(this));
+    this._inStream.on('end', () => {
+      this.flush();
+    });
+    this._packetStream.on('done', () => {
+      this._parseStream.flush();
+    });
+    this._parseStream.on('done', () => {
+      this.emit('done');
+    });
     this._packetStream.on('data', (packet) => {
       this._parseStream.push(packet);
     });
@@ -106,17 +124,19 @@ class Segmenter extends EventEmitter {
     this._inStream.removeListener('data', this._pipe);
     this._packetStream.dispose();
     this._parseStream.dispose();
+    if (this.deleteFiles === true) {
+      const delNo = this._segCounter - (this.segNumber * 3) + 1;
+      fs.unlinkSync(this.streamName + '.m3u8');
+      for (let i = delNo; i <= this._segCounter + this._segments.length; ++i) {
+        const delName = this.outPath + '/' + this.streamName + i + '.ts';
+        fs.unlinkSync(delName);
+      }
+    }
     this._init();
   }
 
   flush() {
     this._packetStream.flush();
-    this._packetStream.on('done', () => {
-      this._parseStream.flush();
-      this._parseStream.on('done', () => {
-        this.emit('done');
-      });
-    });
   }
 }
 

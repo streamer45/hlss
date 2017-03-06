@@ -14,7 +14,15 @@ if (args.length !== 4) {
 const stream = fs.createReadStream(args[2]);
 
 const segmenter = new hlss({
-  outPath: args[3]
+  outPath: args[3],
+  streamName: 'test',
+  segDuration: 5,
+  segNumber: 4,
+  deleteFiles: true
+});
+
+segmenter.on('done', () => {
+  console.log('all done!');
 });
 
 segmenter.start(stream);
