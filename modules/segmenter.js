@@ -83,7 +83,7 @@ class Segmenter extends EventEmitter {
           this._outStream.write(this._pmt);
         }
         if (this.deleteFiles === true) {
-          const delNo = this._segCounter - (this.segNumber * 3);
+          const delNo = this._segCounter - (this.segNumber * 2);
           if (delNo >= 0) {
             const delName = this.outPath + '/' +
              this.streamName + delNo + '.ts';
@@ -125,8 +125,12 @@ class Segmenter extends EventEmitter {
     this._packetStream.dispose();
     this._parseStream.dispose();
     if (this.deleteFiles === true) {
-      const delNo = this._segCounter - (this.segNumber * 3) + 1;
-      fs.unlinkSync(this.streamName + '.m3u8');
+      let delNo;
+      delNo = this._segCounter - (this.segNumber * 2) + 1;
+      if (delNo < 0) delNo = 0;
+      try {
+        fs.unlinkSync(this.outPath + '/' + this.streamName + '.m3u8');
+      } catch(e) {}
       for (let i = delNo; i <= this._segCounter + this._segments.length; ++i) {
         const delName = this.outPath + '/' + this.streamName + i + '.ts';
         fs.unlinkSync(delName);
