@@ -14,7 +14,7 @@ class Segmenter extends EventEmitter {
     this.streamName = setup.streamName || 'stream';
     this.segDuration = setup.segDuration || 4;
     this.segNumber = setup.segNumber || 6;
-    this.deleteFiles = setup.deleteFiles || true;
+    this.deleteFiles = setup.deleteFiles === false ? false : true;
     this._init();
   }
 
@@ -23,7 +23,6 @@ class Segmenter extends EventEmitter {
     this._pmt = null;
     this._segments = [];
     this._segCounter = 0;
-    this._lastPTS = 0;
     this._lastSegPTS = 0;
     this._packetStream = new ts.TransportPacketStream();
     this._parseStream = new ts.TransportParseStream();
@@ -51,6 +50,7 @@ class Segmenter extends EventEmitter {
   }
 
   _process(result) {
+    let ptsDiff = 0;
     const packet = result.packet;
     if (result.type === 'pat') this._pat = Buffer.from(packet);
     if (result.type === 'pmt') this._pmt = Buffer.from(packet);
@@ -62,19 +62,18 @@ class Segmenter extends EventEmitter {
       if (res && res.pts) res.pts /= PES_TIME_SCALE;
       if (res && res.dts) res.dts /= PES_TIME_SCALE;
       if (res && res.pts) {
-        this._lastPTS = res.pts;
-        if (this._lastSegPTS === 0) this._lastSegPTS = this._lastPTS;
+        if (this._lastSegPTS === 0) this._lastSegPTS = res.pts;
+        ptsDiff = res.pts - this._lastSegPTS;
       }
-      if (result.keyframe &&
-         (this._lastPTS - this._lastSegPTS) >= this.segDuration) {
-        this._segments.push((this._lastPTS - this._lastSegPTS).toFixed(6));
+      if (result.keyframe && Math.round(ptsDiff) >= this.segDuration) {
+        this._segments.push(ptsDiff.toFixed(6));
         if (this._segments.length > this.segNumber) {
           this._segments.shift();
           ++this._segCounter;
         }
         this._outStream.end();
         this._genPlaylist();
-        this._lastSegPTS = this._lastPTS;
+        this._lastSegPTS = res.pts;
         const outName = this.outPath + '/' + this.streamName +
         (this._segCounter + this._segments.length) + '.ts';
         this._outStream = fs.createWriteStream(outName);
