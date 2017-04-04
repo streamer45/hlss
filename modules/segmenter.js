@@ -132,7 +132,9 @@ class Segmenter extends EventEmitter {
       } catch(e) {}
       for (let i = delNo; i <= this._segCounter + this._segments.length; ++i) {
         const delName = this.outPath + '/' + this.streamName + i + '.ts';
-        fs.unlinkSync(delName);
+        try {
+          fs.unlinkSync(delName);
+        } catch(e) {}
       }
     }
     this._init();
