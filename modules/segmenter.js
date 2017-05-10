@@ -52,8 +52,14 @@ class Segmenter extends EventEmitter {
   _process(result) {
     let ptsDiff = 0;
     const packet = result.packet;
-    if (result.type === 'pat') this._pat = Buffer.from(packet);
-    if (result.type === 'pmt') this._pmt = Buffer.from(packet);
+    if (result.type === 'pat')
+      this._pat = Buffer.from(packet);
+      return;
+    }
+    if (result.type === 'pmt') {
+      this._pmt = Buffer.from(packet);
+      return;
+    }
     if (result.type === 'pes' && result.streamType === 27) {
       result.keyframe = probe.videoPacketContainsKeyFrame(packet);
     }
