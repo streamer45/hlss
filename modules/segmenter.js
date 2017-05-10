@@ -77,7 +77,7 @@ class Segmenter extends EventEmitter {
         const outName = this.outPath + '/' + this.streamName +
         (this._segCounter + this._segments.length) + '.ts';
         this._outStream = fs.createWriteStream(outName);
-        if (this.pat && this.pmt) {
+        if (this._pat && this._pmt) {
           this._outStream.write(this._pat);
           this._outStream.write(this._pmt);
         }
