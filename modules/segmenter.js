@@ -52,7 +52,7 @@ class Segmenter extends EventEmitter {
   _process(result) {
     let ptsDiff = 0;
     const packet = result.packet;
-    if (result.type === 'pat')
+    if (result.type === 'pat') {
       this._pat = Buffer.from(packet);
       return;
     }
@@ -135,12 +135,12 @@ class Segmenter extends EventEmitter {
       if (delNo < 0) delNo = 0;
       try {
         fs.unlinkSync(this.outPath + '/' + this.streamName + '.m3u8');
-      } catch(e) {}
+      } catch (e) {}
       for (let i = delNo; i <= this._segCounter + this._segments.length; ++i) {
         const delName = this.outPath + '/' + this.streamName + i + '.ts';
         try {
           fs.unlinkSync(delName);
-        } catch(e) {}
+        } catch (e) {}
       }
     }
     this._init();
