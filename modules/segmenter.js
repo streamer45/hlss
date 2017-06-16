@@ -63,13 +63,17 @@ class Segmenter extends EventEmitter {
     if (result.type === 'pes' && result.streamType === 27) {
       result.keyframe = probe.videoPacketContainsKeyFrame(packet);
     }
-    if (result.payloadUnitStartIndicator) {
+    if (result.payloadUnitStartIndicator && result.streamType === 27) {
       const res = probe.parsePesTime(packet);
       if (res && res.pts) res.pts /= PES_TIME_SCALE;
       if (res && res.dts) res.dts /= PES_TIME_SCALE;
       if (res && res.pts) {
         if (this._lastSegPTS === 0) this._lastSegPTS = res.pts;
         ptsDiff = res.pts - this._lastSegPTS;
+        if (ptsDiff < 0) {
+          this._lastSegPTS = 0;
+          ptsDiff = 0;
+        }
       }
       if (result.keyframe && Math.round(ptsDiff) >= this.segDuration) {
         this._segments.push(ptsDiff.toFixed(6));
