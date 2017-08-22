@@ -53,10 +53,12 @@ class Segmenter extends EventEmitter {
     let ptsDiff = 0;
     const packet = result.packet;
     if (result.type === 'pat') {
+      if (this._pat) return;
       this._pat = Buffer.from(packet);
       return;
     }
     if (result.type === 'pmt') {
+      if (this._pmt) return;
       this._pmt = Buffer.from(packet);
       return;
     }
@@ -90,6 +92,11 @@ class Segmenter extends EventEmitter {
         if (this._pat && this._pmt) {
           this._outStream.write(this._pat);
           this._outStream.write(this._pmt);
+          const cc = (this._pat[3] & 0x0f) + 1;
+          this._pat[3] &= ~0xf;
+          this._pmt[3] &= ~0xf;
+          this._pat[3] |= (cc & 0xf);
+          this._pmt[3] |= (cc & 0xf);
         }
         if (this.deleteFiles === true) {
           const delNo = this._segCounter - (this.segNumber * 2);
