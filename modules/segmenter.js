@@ -154,6 +154,7 @@ class Segmenter extends EventEmitter {
         } catch (e) {}
       }
     }
+    if (this._outStream) this._outStream.destroy();
     this._init();
   }
 
