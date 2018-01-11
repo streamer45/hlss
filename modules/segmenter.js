@@ -28,6 +28,7 @@ class Segmenter extends EventEmitter {
     this._parseStream = new ts.TransportParseStream();
     this._inStream = null;
     this._outStream = null;
+    this._first = true;
   }
 
   _genPlaylist() {
@@ -109,6 +110,18 @@ class Segmenter extends EventEmitter {
           }
         }
       }
+    }
+    if (this._first) {
+      if (this._pat && this._pmt) {
+        this._outStream.write(this._pat);
+        this._outStream.write(this._pmt);
+        const cc = (this._pat[3] & 0x0f) + 1;
+        this._pat[3] &= ~0xf;
+        this._pmt[3] &= ~0xf;
+        this._pat[3] |= (cc & 0xf);
+        this._pmt[3] |= (cc & 0xf);
+      }
+      this._first = false;
     }
     this._outStream.write(Buffer.from(packet));
   }
