@@ -33,7 +33,7 @@ class Segmenter extends EventEmitter {
 
   _genPlaylist() {
     let playlist = '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-ALLOW-CACHE:NO\n';
-    const maxDuration = Math.ceil(Math.max(...this._segments));
+    const maxDuration = Math.round(Math.max(...this._segments));
     playlist += `#EXT-X-TARGETDURATION:${maxDuration}\n`;
     playlist += `#EXT-X-MEDIA-SEQUENCE:${this._segCounter}\n`;
     for (let i = 0; i < this._segments.length; ++i) {
