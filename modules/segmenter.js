@@ -132,6 +132,12 @@ class Segmenter extends EventEmitter {
     const outName = this.outPath + '/' + this.streamName +
     (this._segCounter + this._segments.length) + '.ts';
     this._outStream = fs.createWriteStream(outName);
+    this._outStream.on('error', (err) => {
+      this.emit('error', err);
+    });
+    this._inStream.on('error', (err) => {
+      this.emit('error', err);
+    });
     this._inStream.on('data', this._pipe.bind(this));
     this._inStream.on('end', () => {
       this.flush();
